@@ -9,60 +9,36 @@ import Title from '../Dashboard/Title';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 
-// Generate Order Data
-function createData(id, eId, source, numSamples) {
-    return { id, eId, source, numSamples};
-}
-
-const rows = [
-    createData(
-      0,
-      'UOM_520',
-      'University of Melbourne',
-      1,
-    ),
-    createData(
-      1,
-      'UOM_123',
-      'University of Melbourne',
-      2,
-      
-    ),
-    createData(
-      2,
-      'CBP-369', 
-      'cBioPortal',
-      3,
-      ),
-    createData(
-      3,
-      'WH_211',
-      'WEHI',
-      2,
-    ),
-    createData(
-      4,
-      'USYD985',
-      'USYD',
-      1,
-    ),
-  ];
-  
-  function preventDefault(event) {
-    event.preventDefault();
-  }
+const BASE_URL = import.meta.env.VITE_API_BASE_URL; // Get backend URL from .env
 
 export default function Patients() {
-    const navigate = useNavigate();
-    const handleViewDetails = (id) => {
-        navigate(`/patient/${id}`); // Navigates to the project page with the pId
-    };
-    const handleSeeMore = () => {
-      navigate('/patients'); // Replace with the actual route you want to navigate to
+  const navigate = useNavigate();
+  const [patients, setPatients] = React.useState([]);
+
+  React.useEffect(() => {
+    const fetchPatients = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/patients/`);
+        const data = await response.json();
+        setPatients(data.slice(0, 5)); // Only show 5 patients
+      } catch (error) {
+        console.error('Failed to fetch patients:', error);
+      }
     };
 
-    return (
-        <React.Fragment>
+    fetchPatients();
+  }, []);
+
+  const handleViewDetails = (id) => {
+    navigate(`/patient/${id}`); // Navigate to patient details
+  };
+
+  const handleSeeMore = () => {
+    navigate('/patients'); // Navigate to full patients list
+  };
+
+  return (
+    <React.Fragment>
       <Title>Patients</Title>
       <Table size="small">
         <TableHead>
@@ -75,22 +51,19 @@ export default function Patients() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell align='center'>{row.id}</TableCell>
-              <TableCell align='center'>{row.eId}</TableCell>
-              <TableCell>{row.source}</TableCell>
-              <TableCell align='center'>{row.numSamples}</TableCell>
+          {patients.map((patient) => (
+            <TableRow key={patient.id}>
+              <TableCell align='center'>{patient.id}</TableCell>
+              <TableCell align='center'>{patient.ext_patient_id || patient.public_patient_id || '—'}</TableCell>
+              <TableCell>{'Unknown'}</TableCell> {/* Or you can use a real field if you have a source */}
+              <TableCell align='center'>{patient.sample_count || 0}</TableCell>
               <TableCell align="right">
-              <Button
+                <Button
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={() => handleViewDetails(row.id)}
-                  sx={{ textTransform: 'none',
-                    padding: '5px 10px', // Increase padding for a bigger button
-                    fontSize: '10px', // Increase font size
-                 }}
+                  onClick={() => handleViewDetails(patient.id)}
+                  sx={{ textTransform: 'none', padding: '5px 10px', fontSize: '10px' }}
                 >
                   View Details
                 </Button>
@@ -108,5 +81,5 @@ export default function Patients() {
         See more...
       </Link>
     </React.Fragment>
-    );
+  );
 }

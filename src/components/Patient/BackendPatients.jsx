@@ -33,6 +33,8 @@ import Button from '@mui/material/Button';
 
 const drawerWidth = 240;
 const defaultTheme = createTheme();
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -98,27 +100,21 @@ export default function AllPatients() {
   useEffect(() => {
     const fetchPatients = async () => {
       try {
-        setPatients([]); // Clear the previous patients
-
-        let url = 'http://115.146.84.144/patients/';
+        let url = `${BASE_URL}/patients/`;
         if (projectId) {
           url += `?project_id=${projectId}`;
         }
         const response = await fetch(url);
-
-        if (!response.ok) {
-          throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
         const data = await response.json();
         setPatients(data);
       } catch (error) {
         console.error('Error fetching patients:', error);
       }
     };
-
+  
     fetchPatients();
   }, [projectId]);
+  
 
   const handleLogout = () => {
     dispatch(logout());

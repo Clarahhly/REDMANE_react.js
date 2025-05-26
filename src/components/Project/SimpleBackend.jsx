@@ -11,11 +11,12 @@ const BackendProjects = () => {
     const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
     // Fetch data from FastAPI
     const fetchProjects = async () => {
         try {
-            const response = await fetch('http://localhost:8888/projects/');
+            const response = await fetch('${BASE_URL}/projects/');
             if (!response.ok) {
                 throw new Error(`Error: ${response.status}`);
             }

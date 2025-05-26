@@ -30,9 +30,11 @@ import ChevronLeftIcon from '@mui/icons-material/ChevronLeft';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import WehiLogo from '../../assets/logos/wehi-logo.png';
 import MelbUniLogo from '../../assets/logos/unimelb-logo.png';
+import RegisterDatasetModal from '../Dataset/RegisterDatasetModal';
 
 const drawerWidth = 240;
 const defaultTheme = createTheme();
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const AppBar = styled(MuiAppBar, {
   shouldForwardProp: (prop) => prop !== 'open',
@@ -81,37 +83,37 @@ const Drawer = styled(MuiDrawer, { shouldForwardProp: (prop) => prop !== 'open' 
 
 export default function AllDatasets() {
   const [open, setOpen] = useState(false);
-  const [datasets, setDatasets] = useState([]); // For fetched data
+  const [datasets, setDatasets] = useState([]);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const location = useLocation();
-
   const projectId = new URLSearchParams(location.search).get('project_id');
 
   const toggleDrawer = () => {
     setOpen(!open);
   };
 
-  // Fetch datasets from backend
   useEffect(() => {
     const fetchDatasets = async () => {
       try {
-        let url = 'http://115.146.84.144/datasets/';
+        let url = `${BASE_URL}/datasets/`;
         if (projectId) {
           url += `?project_id=${projectId}`;
         }
         const response = await fetch(url);
         const data = await response.json();
-        setDatasets(data); // Assuming the API response is an array of datasets
+        setDatasets(data);
       } catch (error) {
         console.error('Error fetching datasets:', error);
       }
     };
     fetchDatasets();
-  }, [projectId]);
+  }, [projectId, refreshKey]);
 
   const handleLogout = () => {
     dispatch(logout());
@@ -143,27 +145,11 @@ export default function AllDatasets() {
             <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
               {projectId ? `Datasets for Project ${projectId}` : 'All Datasets'}
             </Typography>
-            <div style={{ display: 'flex', 
-                          alignItems: 'center',
-                          backgroundColor: 'rgba(255, 255, 255, 1)' ,
-                          padding: '5px',
-                          borderRadius: '5px',
-                          alignSelf: 'center',
-                          marginRight: '10px'
-                          }}>
-              <img src={WehiLogo} alt="WEHI" width="90" height="30" 
-                   style={{marginLeft: '10px', marginRight: '10px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 1)', padding: '5px', borderRadius: '5px', alignSelf: 'center', marginRight: '10px' }}>
+              <img src={WehiLogo} alt="WEHI" width="90" height="30" style={{ marginLeft: '10px', marginRight: '10px' }} />
             </div>
-            <div style={{ display: 'flex', 
-                          alignItems: 'center',
-                          backgroundColor: 'rgba(255, 255, 255, 1)' ,
-                          padding: '5px',
-                          borderRadius: '5px',
-                          alignSelf: 'center',
-                          marginRight: '10px'
-                          }}>
-              <img src={MelbUniLogo} alt="Melbourne University" width="30" height="30"
-                   style={{marginLeft: '2px', marginRight: '2px' }} />
+            <div style={{ display: 'flex', alignItems: 'center', backgroundColor: 'rgba(255, 255, 255, 1)', padding: '5px', borderRadius: '5px', alignSelf: 'center', marginRight: '10px' }}>
+              <img src={MelbUniLogo} alt="Melbourne University" width="30" height="30" style={{ marginLeft: '2px', marginRight: '2px' }} />
             </div>
             <Box sx={{ marginRight: '10px' }}>
               <Button variant="contained" color="warning" onClick={handleLogout} sx={{ textTransform: 'none', padding: '5px 20px', fontSize: '16px', backgroundColor: '#00274D' }}>
@@ -195,6 +181,26 @@ export default function AllDatasets() {
               <Grid item xs={12}>
                 <Paper sx={{ p: 2, display: 'flex', flexDirection: 'column' }}>
                   <Title>Datasets</Title>
+
+                  {projectId && (
+                    <>
+                      <Button
+                        variant="contained"
+                        onClick={() => setModalOpen(true)}
+                        sx={{ width: '200px', mb: 2, textTransform: 'none', backgroundColor: '#1976d2', '&:hover': { backgroundColor: '#1565c0' } }}
+                      >
+                        + Register New Dataset
+                      </Button>
+
+                      <RegisterDatasetModal
+                        open={modalOpen}
+                        onClose={() => setModalOpen(false)}
+                        onSuccess={() => setRefreshKey((prev) => prev + 1)}
+                        projectId={parseInt(projectId)}
+                      />
+                    </>
+                  )}
+
                   <Table size="large">
                     <TableHead>
                       <TableRow>
@@ -224,31 +230,31 @@ export default function AllDatasets() {
                                 size="small"
                                 onClick={() => handleViewDetails(dataset.id)}
                                 sx={{ textTransform: 'none' }}
-                                >
-                                  View
-                                </Button>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                    <TablePagination
-                      rowsPerPageOptions={[5, 10, 25]}
-                      component="div"
-                      count={datasets.length}
-                      rowsPerPage={rowsPerPage}
-                      page={page}
-                      onPageChange={handleChangePage}
-                      onRowsPerPageChange={handleChangeRowsPerPage}
-                    />
-                  </Paper>
-                </Grid>
+                              >
+                                View
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                  <TablePagination
+                    rowsPerPageOptions={[5, 10, 25]}
+                    component="div"
+                    count={datasets.length}
+                    rowsPerPage={rowsPerPage}
+                    page={page}
+                    onPageChange={handleChangePage}
+                    onRowsPerPageChange={handleChangeRowsPerPage}
+                  />
+                </Paper>
               </Grid>
-              <Footer />
-            </Container>
-          </Box>
+            </Grid>
+            <Footer />
+          </Container>
         </Box>
-      </ThemeProvider>
-    );
-  }
+      </Box>
+    </ThemeProvider>
+  );
+}

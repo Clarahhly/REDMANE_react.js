@@ -33,6 +33,8 @@ import TablePagination from '@mui/material/TablePagination';
 
 import { useDispatch } from 'react-redux';
 import { logout } from '../../actions/authActions'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 
 // Generate Order Data, this will be replaced with data from the backend
@@ -40,43 +42,24 @@ function createData(id, pId, date, name, status) {
   return { id, pId, date, name, status};
 }
 
-const rows = [
-  createData(
-    0,
-    'BU250',
-    '16 Aug, 2024',
-    'WOw',
-    'Active',
-  ),
-  createData(
-    1,
-    'YAO666',
-    '26 Jun, 2024',
-    'SHIne',
-    'Active',
-  ),
-  createData(
-    2,
-    'ZUO690', 
-    '16 Jun, 2024',
-    'GEnius', 
-    'Active',
-    ),
-  createData(
-    3,
-    'TIAN88',
-    '16 May, 2024',
-    'SHAke',
-    'Active',
-  ),
-  createData(
-    4,
-    'GOU468',
-    '15 Apr, 2024',
-    'BIte',
-    'Active',
-  ),
-];
+const [projects, setProjects] = useState([]);
+
+useEffect(() => {
+  const fetchProjects = async () => {
+    try {
+      const response = await fetch(`${BASE_URL}/projects/`);
+      const data = await response.json();
+      setProjects(data);
+    } catch (error) {
+      console.error("Error fetching projects:", error);
+    }
+  };
+
+  fetchProjects();
+}, []);
+
+
+
   function preventDefault(event) {
     event.preventDefault();
   }
@@ -300,29 +283,37 @@ export default function AllProjects() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((row) => (
-                            <TableRow key={row.id}>
-                               <TableCell>{row.pId}</TableCell>
-                               <TableCell>{row.date}</TableCell>
-                               <TableCell>{row.name}</TableCell>
-                               <TableCell>{row.status}</TableCell>
-                               <TableCell align="right">
-                                <Button
-                                    variant="contained"
-                                    color="primary"
-                                    size="small"
-                                    onClick={() => handleViewDetails(row.pId)}
-                                    sx={{ textTransform: 'none',
-                                    padding: '5px 10px', // Increase padding for a bigger button
-                                    fontSize: '10px', // Increase font size
-                                }}
-                                >
-                                    View Files
-                                </Button>
-                                </TableCell>
+                          {projects.length === 0 ? (
+                            <TableRow>
+                              <TableCell colSpan={5} align="center">
+                                No projects available.
+                              </TableCell>
                             </TableRow>
-                            ))}
+                          ) : (
+                            projects
+                            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                            .map((project) => (
+                              <TableRow key={project.id}>
+                              <TableCell>{project.id}</TableCell>
+                              <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
+                              <TableCell>{project.name}</TableCell>
+                              <TableCell>{project.status}</TableCell>
+                              <TableCell align="right">
+                                <Button
+                                  variant="contained"
+                                  color="primary"
+                                  size="small"
+                                  onClick={() => handleViewDetails(project.id)}
+                                  sx={{ textTransform: 'none', padding: '5px 10px', fontSize: '10px' }}
+                                >
+                                  View Files
+                                </Button>
+                              </TableCell>
+                              </TableRow>
+                            ))
+                         )}
                         </TableBody>
+
                         </Table>
                         <TablePagination
                             rowsPerPageOptions={[5, 10, 25]}

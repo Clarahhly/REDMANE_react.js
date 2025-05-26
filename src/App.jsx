@@ -1,32 +1,25 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 
-import HomePage from './pages/HomePage'
-import { LoginPage } from './pages/LoginPage'
-import { DashboardPage } from './pages/DashboardPage'
-import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
-
-import AllDatasets from './pages/DatasetPage/AllDatasetsPage'
-import AllProjects from './pages/ProjectPage/AllProjectsPage'
-import AllPatients from './pages/PatientPage/AllPatientsPage'
-
+import HomePage from './pages/HomePage';
+import { LoginPage } from './pages/LoginPage';
+import { DashboardPage } from './pages/DashboardPage';
+import AllDatasets from './pages/DatasetPage/AllDatasetsPage';
+import AllProjects from './pages/ProjectPage/AllProjectsPage';
+import AllPatients from './pages/PatientPage/AllPatientsPage';
 import SingleDatasetPage from './pages/DatasetPage/SingleDatasetPage';
 import SinglePatientPage from './pages/PatientPage/SinglePatientPage';
 import SingleProjectPage from './pages/ProjectPage/SingleProjectPage';
-
-import Visualization from './pages/Visualization'
-
+import Visualization from './pages/Visualization';
 import ProtectedRoute from './components/ProtectedRoute';
+import DatasetFilesPage from './pages/DatasetPage/DatasetFilesPage';
 
 function App() {
-
   return (
     <Router>
       <Routes>
-        <Route path="/" element={<HomePage />}/>
+        <Route path="/" element={<HomePage />} />
         <Route path="/login" element={<LoginPage />} />
-        <Route 
+        <Route
           path="/dashboard"
           element={
             <ProtectedRoute>
@@ -34,13 +27,12 @@ function App() {
             </ProtectedRoute>
           }
         />
-
-        {/* Full Page */}
+        {/* Full Pages */}
         <Route
           path="/datasets"
           element={
             <ProtectedRoute>
-              <AllDatasets/>
+              <AllDatasets />
             </ProtectedRoute>
           }
         />
@@ -48,7 +40,7 @@ function App() {
           path="/projects"
           element={
             <ProtectedRoute>
-              <AllProjects/>
+              <AllProjects />
             </ProtectedRoute>
           }
         />
@@ -56,11 +48,11 @@ function App() {
           path="/patients"
           element={
             <ProtectedRoute>
-              <AllPatients/>
+              <AllPatients />
             </ProtectedRoute>
           }
-          />
-          <Route
+        />
+        <Route
           path="/visualizations"
           element={
             <ProtectedRoute>
@@ -68,13 +60,21 @@ function App() {
             </ProtectedRoute>
           }
         />
-        
-        {/* Single Page */}
+
+        {/* Single Pages */}
         <Route
           path="/dataset/:id"
           element={
             <ProtectedRoute>
               <SingleDatasetPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dataset/:id/DatasetFilesPage"
+          element={
+            <ProtectedRoute>
+              <DatasetFilesPage />
             </ProtectedRoute>
           }
         />
@@ -99,4 +99,4 @@ function App() {
   );
 }
 
-export default App
+export default App;

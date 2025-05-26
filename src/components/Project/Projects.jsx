@@ -9,64 +9,36 @@ import Title from '../Dashboard/Title';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@mui/material';
 
-// Generate Order Data
-function createData(id, pId, date, name, status) {
-    return { id, pId, date, name, status};
-}
-
-const rows = [
-    createData(
-      0,
-      'BU250',
-      '16 Aug, 2024',
-      'WOw',
-      'Active',
-    ),
-    createData(
-      1,
-      'YAO666',
-      '26 Jun, 2024',
-      'SHIne',
-      'Active',
-    ),
-    createData(
-      2,
-      'ZUO690', 
-      '16 Jun, 2024',
-      'GEnius', 
-      'Active',
-      ),
-    createData(
-      3,
-      'TIAN88',
-      '16 May, 2024',
-      'SHAke',
-      'Active',
-    ),
-    createData(
-      4,
-      'GOU468',
-      '15 Apr, 2024',
-      'BIte',
-      'Active',
-    ),
-  ];
-  
-  function preventDefault(event) {
-    event.preventDefault();
-  }
+const BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function Projects() {
-    const navigate = useNavigate();
-    const handleViewDetails = (pId) => {
-        navigate(`/project/${pId}`); // Navigates to the project page with the pId
-    };
-    const handleSeeMore = () => {
-        navigate('/projects'); // Replace with the actual route you want to navigate to
-      };
+  const navigate = useNavigate();
+  const [projects, setProjects] = React.useState([]);
 
-    return (
-        <React.Fragment>
+  React.useEffect(() => {
+    const fetchProjects = async () => {
+      try {
+        const response = await fetch(`${BASE_URL}/projects/`);
+        const data = await response.json();
+        setProjects(data.slice(0, 5)); 
+      } catch (error) {
+        console.error('Failed to fetch projects:', error);
+      }
+    };
+
+    fetchProjects();
+  }, []);
+
+  const handleViewDetails = (pId) => {
+    navigate(`/project/${pId}`);
+  };
+
+  const handleSeeMore = () => {
+    navigate('/projects');
+  };
+
+  return (
+    <React.Fragment>
       <Title>Recent Projects</Title>
       <Table size="small">
         <TableHead>
@@ -79,22 +51,19 @@ export default function Projects() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
-            <TableRow key={row.id}>
-              <TableCell>{row.pId}</TableCell>
-              <TableCell>{row.date}</TableCell>
-              <TableCell>{row.name}</TableCell>
-              <TableCell>{row.status}</TableCell>
+          {projects.map((project) => (
+            <TableRow key={project.id}>
+              <TableCell>{project.id}</TableCell>
+              <TableCell>{new Date(project.created_at).toLocaleDateString()}</TableCell>
+              <TableCell>{project.name}</TableCell>
+              <TableCell>{project.status}</TableCell>
               <TableCell align="right">
-              <Button
+                <Button
                   variant="contained"
                   color="primary"
                   size="small"
-                  onClick={() => handleViewDetails(row.pId)}
-                  sx={{ textTransform: 'none',
-                    padding: '5px 10px', // Increase padding for a bigger button
-                    fontSize: '10px', // Increase font size
-                 }}
+                  onClick={() => handleViewDetails(project.id)}
+                  sx={{ textTransform: 'none', padding: '5px 10px', fontSize: '10px' }}
                 >
                   View Details
                 </Button>
@@ -112,5 +81,5 @@ export default function Projects() {
         See more...
       </Link>
     </React.Fragment>
-    );
+  );
 }
